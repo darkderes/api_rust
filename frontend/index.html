@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Tareas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .form-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 20px;
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tareas-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .tarea-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .tarea-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .tarea-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .tarea-descripcion {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+        }
+
+        .tarea-estado {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .estado-Pendiente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .estado-Ejecucion {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .estado-Realizada {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .tarea-fecha {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .tarea-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .estado-selector {
+            padding: 6px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 18px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 0.8s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Gestor de Tareas</h1>
+        
+        <div class="form-container">
+            <div class="input-group">
+                <input type="text" id="nuevaTarea" placeholder="Descripción de la tarea..." />
+                <select id="estadoNuevo">
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="Ejecucion">En Ejecución</option>
+                    <option value="Realizada">Realizada</option>
+                </select>
+                <button class="btn-primary" onclick="crearTarea()">Agregar</button>
+            </div>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" onclick="filtrarTareas('todas')">Todas</button>
+            <button class="filter-btn" onclick="filtrarTareas('Pendiente')">Pendientes</button>
+            <button class="filter-btn" onclick="filtrarTareas('Ejecucion')">En Ejecución</button>
+            <button class="filter-btn" onclick="filtrarTareas('Realizada')">Realizadas</button>
+        </div>
+
+        <div id="tareasContainer" class="tareas-list">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Cargando tareas...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000'
+            : `http://${window.location.hostname}:3000`;
+        let tareas = [];
+        let filtroActual = 'todas';
+
+        // Cargar tareas al iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarTareas();
+            
+            // Enter para agregar tarea
+            document.getElementById('nuevaTarea').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') crearTarea();
+            });
+        });
+
+        async function cargarTareas() {
+            try {
+                const response = await fetch(`${API_URL}/tareas`);
+                tareas = await response.json();
+                renderizarTareas();
+            } catch (error) {
+                console.error('Error al cargar tareas:', error);
+                mostrarError('No se pudo conectar con el servidor');
+            }
+        }
+
+        async function crearTarea() {
+            const descripcion = document.getElementById('nuevaTarea').value.trim();
+            const estado = document.getElementById('estadoNuevo').value;
+
+            if (!descripcion) {
+                alert('Por favor ingresa una descripción');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/tareas`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ descripcion, estado })
+                });
+
+                if (response.ok) {
+                    document.getElementById('nuevaTarea').value = '';
+                    document.getElementById('estadoNuevo').value = 'Pendiente';
+                    await cargarTareas();
+                }
+            } catch (error) {
+                console.error('Error al crear tarea:', error);
+                alert('Error al crear la tarea');
+            }
+        }
+
+        async function actualizarEstado(id, nuevoEstado) {
+            try {
+                const response = await fetch(`${API_URL}/tareas/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ estado: nuevoEstado })
+                });
+
+                if (response.ok) {
+                    await cargarTareas();
+                }
+            } catch (error) {
+                console.error('Error al actualizar tarea:', error);
+                alert('Error al actualizar la tarea');
+            }
+        }
+
+        async function eliminarTarea(id) {
+            if (!confirm('¿Estás seguro de eliminar esta tarea?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/tareas/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    await cargarTareas();
+                }
+            } catch (error) {
+                console.error('Error al eliminar tarea:', error);
+                alert('Error al eliminar la tarea');
+            }
+        }
+
+        function filtrarTareas(filtro) {
+            filtroActual = filtro;
+            
+            // Actualizar botones
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            renderizarTareas();
+        }
+
+        function renderizarTareas() {
+            const container = document.getElementById('tareasContainer');
+            
+            const tareasFiltradas = filtroActual === 'todas' 
+                ? tareas 
+                : tareas.filter(t => t.estado === filtroActual);
+
+            if (tareasFiltradas.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        <h3>No hay tareas ${filtroActual !== 'todas' ? filtroActual.toLowerCase() + 's' : ''}</h3>
+                        <p>Agrega una nueva tarea para comenzar</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = tareasFiltradas.map(tarea => {
+                const tareaId = tarea._id?.$oid || tarea._id || tarea.id?.$oid || tarea.id;
+                return `
+                <div class="tarea-item">
+                    <div class="tarea-header">
+                        <div class="tarea-descripcion">${tarea.descripcion}</div>
+                        <div class="tarea-estado estado-${tarea.estado}">${tarea.estado}</div>
+                    </div>
+                    <div class="tarea-fecha">
+                        Creada: ${formatearFecha(tarea.fecha_creacion)}
+                    </div>
+                    <div class="tarea-actions">
+                        <select class="estado-selector" onchange="actualizarEstado('${tareaId}', this.value)">
+                            <option value="">Cambiar estado...</option>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Ejecucion">En Ejecución</option>
+                            <option value="Realizada">Realizada</option>
+                        </select>
+                        <button class="btn-danger" onclick="eliminarTarea('${tareaId}')">Eliminar</button>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function formatearFecha(fechaISO) {
+            const fecha = new Date(fechaISO);
+            return fecha.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function mostrarError(mensaje) {
+            document.getElementById('tareasContainer').innerHTML = `
+                <div class="empty-state">
+                    <h3>⚠️ Error</h3>
+                    <p>${mensaje}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

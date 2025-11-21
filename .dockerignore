@@ -1,0 +1,11 @@
+# Ignorar archivos innecesarios en la imagen Docker
+target/
+Cargo.lock
+.git
+.gitignore
+.vscode/
+frontend/server.ps1
+run.ps1
+README.md
+*.md
+.env

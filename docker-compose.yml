@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # Base de datos MongoDB
+  mongodb:
+    image: mongo:7
+    container_name: tareas_mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - tareas_network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # API Backend en Rust
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tareas_api
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - RUST_LOG=info
+      - MONGODB_URI=mongodb://mongodb:27017/
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - tareas_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/tareas"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: tareas_frontend
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    networks:
+      - tareas_network
+
+# Volúmenes persistentes
+volumes:
+  mongodb_data:
+    driver: local
+
+# Red interna
+networks:
+  tareas_network:
+    driver: bridge

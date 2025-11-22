@@ -2,6 +2,7 @@ mod db;
 mod handlers;
 mod models;
 mod routes;
+mod utils;
 
 use axum::Router;
 use db::mongo::conectar_mongodb;

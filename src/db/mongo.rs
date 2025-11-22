@@ -1,5 +1,6 @@
 use mongodb::{bson::doc, Client, Collection, Database};
 use crate::models::tarea::Tarea;
+use crate::models::usuario::Usuario;
 
 pub type DbState = Database;
 
@@ -20,4 +21,8 @@ pub async fn conectar_mongodb() -> Result<Database, mongodb::error::Error> {
 
 pub fn obtener_coleccion_tareas(db: &Database) -> Collection<Tarea> {
     db.collection::<Tarea>("tareas")
+}
+
+pub fn obtener_coleccion_usuarios(db: &Database) -> Collection<Usuario> {
+    db.collection::<Usuario>("usuarios")
 }
